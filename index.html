@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Tiketing Traveloka - Demo Algoritma</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; color: #333; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #1ba0e2; text-align: center; } /* Warna khas Traveloka */
+        .section { margin-bottom: 25px; padding: 15px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa; }
+        button { padding: 9px 16px; background-color: #1ba0e2; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 5px; font-weight: bold; }
+        button:hover { background-color: #0282c4; }
+        input { padding: 9px; width: 60%; margin-right: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: white; }
+        table, th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+        th { background-color: #e6f4fc; color: #0282c4; }
+        .log-box { background: #1e1e1e; color: #00ff00; padding: 12px; font-family: monospace; height: 160px; overflow-y: auto; border-radius: 4px; margin-top: 10px; font-size: 13px; line-height: 1.4; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Aplikasi Pemesanan Tiket (Tiketing)</h1>
+    <p style="text-align: center; color: #666;">NIM: 018 (Genap) - Tema: Tiketing (Mirip Traveloka)</p>
+
+    <!-- Data Tiket (Array of Struct) -->
+    <div class="section">
+        <h2>Daftar Tiket Perjalanan (Array, Struct & Pointer)</h2>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>ID Tiket</th>
+                    <th>Nama Transportasi / Maskapai</th>
+                    <th>Rute Perjalanan</th>
+                    <th>Harga Tiket</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <!-- 1. Sorting -->
+    <div class="section">
+        <h2>1. Algoritma Sorting (Bubble Sort)</h2>
+        <p>Urutkan harga tiket dari termurah atau termahal beserta log operasinya:</p>
+        <button onclick="urutkanTiket('asc')">Urutkan Termurah (Ascending)</button>
+        <button onclick="urutkanTiket('desc')">Urutkan Termahal (Descending)</button>
+        <h3>Log Sorting:</h3>
+        <div id="sortLog" class="log-box">Klik salah satu tombol di atas untuk melihat proses sorting...</div>
+    </div>
+
+    <!-- 2. Searching -->
+    <div class="section">
+        <h2>2. Algoritma Searching (Linear Search)</h2>
+        <p>Cari tiket berdasarkan nama maskapai atau rute perjalanan:</p>
+        <input type="text" id="searchInput" placeholder="Cari maskapai / rute (misal: Garuda, Bali, Kereta)...">
+        <button onclick="cariTiket()">Cari Tiket</button>
+        <h3>Log Searching:</h3>
+        <div id="searchLog" class="log-box">Masukkan kata kunci dan klik 'Cari Tiket'...</div>
+    </div>
+</div>
+
+<script>
+    // === STRUCT IMPLEMENTATION ===
+    // Menggunakan Class sebagai representasi Struct
+    class Tiket {
+        constructor(id, maskapai, rute, harga) {
+            this.id = id;
+            this.maskapai = maskapai;
+            this.rute = rute;
+            this.harga = harga;
+        }
+    }
+
+    // === ARRAY IMPLEMENTATION ===
+    // Array menampung data Struct Tiket
+    let daftarTiket = [
+        new Tiket("TKT-01", "Garuda Indonesia", "Jakarta (CGK) -> Bali (DPS)", 1800000),
+        new Tiket("TKT-02", "Kereta Argo Bromo", "Jakarta (GMR) -> Surabaya (SBI)", 600000),
+        new Tiket("TKT-03", "Lion Air", "Surabaya (SUB) -> Jakarta (CGK)", 950000),
+        new Tiket("TKT-04", "Bus Sinar Jaya", "Bandung (BGD) -> Jogja (JOG)", 220000),
+        new Tiket("TKT-05", "Batik Air", "Jakarta (CGK) -> Medan (KNO)", 1400000)
+    ];
+
+    // === POINTER / REFERENCE IMPLEMENTATION ===
+    // Mengubah harga tiket langsung melalui referensi memori objek (pointer)
+    function ubahHargaTiket(tiketRef, hargaBaru) {
+        tiketRef.harga = hargaBaru;
+    }
+
+    // Fungsi menampilkan data ke tabel HTML
+    function renderTable(data) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        data.forEach(item => {
+            tbody.innerHTML += `
+                <tr>
+                    <td><b>${item.id}</b></td>
+                    <td>${item.maskapai}</td>
+                    <td>${item.rute}</td>
+                    <td>Rp ${item.harga.toLocaleString('id-ID')}</td>
+                </tr>
+            `;
+        });
+    }
+
+    // === 1. SORTING (BUBBLE SORT WITH LOG) ===
+    function urutkanTiket(mode) {
+        let logDiv = document.getElementById('sortLog');
+        logDiv.innerHTML = `[Mulai Bubble Sort - Mode: ${mode.toUpperCase()}]<br>`;
+        
+        let arr = [...daftarTiket]; // Clone array data
+        let n = arr.length;
+        let langkah = 1;
+
+        for (let i = 0; i < n - 1; i++) {
+            for (let j = 0; j < n - i - 1; j++) {
+                let tukar = mode === 'asc' 
+                    ? arr[j].harga > arr[j + 1].harga 
+                    : arr[j].harga < arr[j + 1].harga;
+
+                logDiv.innerHTML += `Langkah ${langkah++}: Bandingkan [${arr[j].maskapai}: Rp${arr[j].harga.toLocaleString('id-ID')}] dengan [${arr[j+1].maskapai}: Rp${arr[j+1].harga.toLocaleString('id-ID')}]<br>`;
+
+                if (tukar) {
+                    let temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                    logDiv.innerHTML += `&nbsp;&nbsp;==> Posisi ditukar!<br>`;
+                }
+            }
+        }
+
+        logDiv.innerHTML += `[Proses Sorting Selesai! Data berhasil diurutkan]<br>`;
+        renderTable(arr);
+    }
+
+    // === 2. SEARCHING (LINEAR SEARCH WITH LOG) ===
+    function cariTiket() {
+        let keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+        let logDiv = document.getElementById('searchLog');
+        logDiv.innerHTML = `[Mulai Linear Search - Kata Kunci: "${keyword}"]<br>`;
+
+        if (!keyword) {
+            logDiv.innerHTML += `Harap masukkan kata kunci pencarian terlebih dahulu!`;
+            return;
+        }
+
+        let hasil = [];
+        for (let i = 0; i < daftarTiket.length; i++) {
+            let teksAkses = (daftarTiket[i].maskapai + " " + daftarTiket[i].rute).toLowerCase();
+            logDiv.innerHTML += `Memeriksa Indeks Array [${i}] (${daftarTiket[i].maskapai} - ${daftarTiket[i].rute})... `;
+            
+            if (teksAkses.includes(keyword)) {
+                logDiv.innerHTML += `<b style="color:#00ff00;">COCOK / DITEMUKAN!</b><br>`;
+                hasil.push(daftarTiket[i]);
+            } else {
+                logDiv.innerHTML += `Tidak cocok.<br>`;
+            }
+        }
+
+        logDiv.innerHTML += `[Pencarian Selesai - Ditemukan ${hasil.length} tiket yang sesuai]<br>`;
+        renderTable(hasil);
+    }
+
+    // Inisialisasi awal saat halaman dimuat
+    renderTable(daftarTiket);
+</script>
+
+</body>
+</html>
